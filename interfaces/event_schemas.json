@@ -1,0 +1,129 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "schemaVersion": "1.0.0",
+  "envelope": {
+    "type": "object",
+    "required": [
+      "eventId",
+      "eventType",
+      "eventVersion",
+      "timestampMs",
+      "sourceModule",
+      "traceId",
+      "priority",
+      "payload"
+    ],
+    "properties": {
+      "eventId": { "type": "string", "minLength": 16 },
+      "eventType": { "type": "string" },
+      "eventVersion": { "type": "string", "pattern": "^v[0-9]+$" },
+      "timestampMs": { "type": "integer", "minimum": 0 },
+      "sourceModule": { "type": "string" },
+      "traceId": { "type": "string" },
+      "priority": { "type": "string", "enum": ["critical", "realtime", "background"] },
+      "payload": { "type": "object" }
+    }
+  },
+  "events": {
+    "PerceptUpdated": {
+      "eventVersion": "v1",
+      "payloadSchema": {
+        "type": "object",
+        "required": ["worldStateId", "uncertainty", "objects"],
+        "properties": {
+          "worldStateId": { "type": "string" },
+          "uncertainty": { "type": "number", "minimum": 0, "maximum": 1 },
+          "objects": { "type": "array", "items": { "type": "object" } }
+        }
+      }
+    },
+    "FocusWindowUpdated": {
+      "eventVersion": "v1",
+      "payloadSchema": {
+        "type": "object",
+        "required": ["focusItems", "capacity", "scores"],
+        "properties": {
+          "focusItems": { "type": "array", "items": { "type": "string" } },
+          "capacity": { "type": "integer", "minimum": 1 },
+          "scores": { "type": "array", "items": { "type": "number" } }
+        }
+      }
+    },
+    "PredictionReady": {
+      "eventVersion": "v1",
+      "payloadSchema": {
+        "type": "object",
+        "required": ["candidates", "expectedUtility", "risk", "horizonMs"],
+        "properties": {
+          "candidates": { "type": "array", "items": { "type": "string" } },
+          "expectedUtility": { "type": "array", "items": { "type": "number" } },
+          "risk": { "type": "array", "items": { "type": "number", "minimum": 0, "maximum": 1 } },
+          "horizonMs": { "type": "integer", "minimum": 1 }
+        }
+      }
+    },
+    "DecisionCommitted": {
+      "eventVersion": "v1",
+      "payloadSchema": {
+        "type": "object",
+        "required": ["decisionId", "selectedAction", "confidence", "deadlineMs"],
+        "properties": {
+          "decisionId": { "type": "string" },
+          "selectedAction": { "type": "string" },
+          "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+          "deadlineMs": { "type": "integer", "minimum": 1 },
+          "abortConditions": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "MotorCommandIssued": {
+      "eventVersion": "v1",
+      "payloadSchema": {
+        "type": "object",
+        "required": ["commandId", "jointTargets", "durationMs"],
+        "properties": {
+          "commandId": { "type": "string" },
+          "jointTargets": { "type": "array", "items": { "type": "number" } },
+          "durationMs": { "type": "integer", "minimum": 1 }
+        }
+      }
+    },
+    "EmergencyTriggered": {
+      "eventVersion": "v1",
+      "payloadSchema": {
+        "type": "object",
+        "required": ["severity", "reason", "safeAction"],
+        "properties": {
+          "severity": { "type": "string", "enum": ["warning", "high", "critical"] },
+          "reason": { "type": "string" },
+          "safeAction": { "type": "string", "enum": ["hold", "stop", "shutdown"] }
+        }
+      }
+    },
+    "RewardComputed": {
+      "eventVersion": "v1",
+      "payloadSchema": {
+        "type": "object",
+        "required": ["rewardId", "value", "predictionError"],
+        "properties": {
+          "rewardId": { "type": "string" },
+          "value": { "type": "number" },
+          "predictionError": { "type": "number" },
+          "components": { "type": "object" }
+        }
+      }
+    },
+    "MemoryConsolidated": {
+      "eventVersion": "v1",
+      "payloadSchema": {
+        "type": "object",
+        "required": ["batchId", "promotedCount", "prunedCount"],
+        "properties": {
+          "batchId": { "type": "string" },
+          "promotedCount": { "type": "integer", "minimum": 0 },
+          "prunedCount": { "type": "integer", "minimum": 0 }
+        }
+      }
+    }
+  }
+}

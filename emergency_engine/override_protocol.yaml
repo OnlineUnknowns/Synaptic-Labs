@@ -1,0 +1,48 @@
+protocolVersion: 1.0.0
+description: Emergency override command protocol for safety-critical preemption.
+
+hazardClasses:
+  - collision_imminent
+  - actuator_runaway
+  - thermal_overload
+  - human_proximity_violation
+  - policy_breach_critical
+  - localization_loss_critical
+
+severityMapping:
+  warning:
+    action: hold
+    requiresOperatorAck: false
+  high:
+    action: stop
+    requiresOperatorAck: true
+  critical:
+    action: shutdown
+    requiresOperatorAck: true
+
+preemptionRules:
+  - critical_channel_preempts_all: true
+  - drop_noncritical_backlog_on_critical: true
+  - stale_decision_contract_ms: 50
+
+requiredAuditFields:
+  - incident_id
+  - trace_id
+  - severity
+  - hazard_class
+  - trigger_source
+  - selected_safe_action
+  - completion_state
+
+recoveryCriteria:
+  hold_to_nominal:
+    - hazard_cleared: true
+    - self_state_confidence_min: 0.85
+    - ethics_check_passed: true
+  stop_to_nominal:
+    - human_clearance: true
+    - map_confidence_min: 0.90
+    - dry_run_command_passed: true
+  shutdown_to_nominal:
+    - manual_maintenance_clearance: true
+    - full_recalibration_passed: true

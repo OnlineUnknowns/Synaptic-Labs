@@ -1,0 +1,52 @@
+profile: phase1_default
+tickRateHz:
+  cognitive_loop: 20
+  motor_loop: 100
+  safety_loop: 200
+
+deadlinesMs:
+  hard:
+    emergency_engine: 2
+    ethics_engine: 3
+    motor_engine_command_issue: 5
+    watchdog_heartbeat: 10
+  soft:
+    attention_engine: 15
+    decision_engine: 20
+    predictive_engine: 25
+    world_model_engine: 20
+    memory_engine_encode: 25
+    metacognition_engine: 30
+    sleep_consolidation_engine: 200
+
+cpuBudgetPercent:
+  emergency_engine: 8
+  motor_engine: 18
+  world_model_engine: 16
+  decision_engine: 12
+  predictive_engine: 15
+  memory_engine: 12
+  neural_network_layer: 10
+  synapse_engine: 5
+  other: 4
+
+queuePolicy:
+  critical:
+    maxDepth: 256
+    overflowAction: drop_noncritical_then_raise_incident
+  realtime:
+    maxDepth: 2048
+    overflowAction: oldest_drop_with_metric
+  background:
+    maxDepth: 4096
+    overflowAction: batch_delay
+
+degradationMode:
+  trigger:
+    budgetOverrunConsecutiveTicks: 10
+    thermalLoadPercent: 92
+  actions:
+    - reduce_predictive_horizon
+    - cap_attention_window
+    - switch_decision_to_rule_fallback
+    - suspend_background_consolidation

@@ -1,0 +1,204 @@
+schemaVersion: 1.0.0
+description: Contract-first definitions for Phase 1 cognitive modules.
+
+common:
+  tickContext:
+    fields:
+      - tick_id: uint64
+      - ts_unix_ms: uint64
+      - trace_id: string
+      - deadline_ms: uint32
+      - mode: [boot, idle, active, safe_hold, recover, sleep]
+  quality:
+    confidence_range: [0.0, 1.0]
+    max_payload_kb: 256
+
+brain_core:
+  responsibilities:
+    - schedule engine execution by priority and deadlines
+    - publish lifecycle transitions
+    - enforce watchdog and budget overruns policy
+  consumes:
+    - EngineHealthUpdated
+    - EmergencyTriggered
+  publishes:
+    - TickStarted
+    - TickEnded
+    - LifecycleTransitioned
+
+neural_network_layer:
+  responsibilities:
+    - maintain neural graph abstractions and forward activations
+    - expose activation traces to synapse engine
+  consumes:
+    - NeuralInputPrepared
+    - SynapseWeightsUpdated
+  publishes:
+    - NeuralActivationsComputed
+
+synapse_engine:
+  responsibilities:
+    - accumulate eligibility traces
+    - apply bounded plasticity updates
+    - execute homeostatic normalization
+  consumes:
+    - NeuralActivationsComputed
+    - RewardComputed
+  publishes:
+    - SynapseWeightsUpdated
+    - PlasticityStatsUpdated
+
+memory_engine:
+  responsibilities:
+    - manage working, episodic, semantic, and procedural tiers
+    - cue-based recall with emotional/context weighting
+    - trigger consolidation candidates
+  consumes:
+    - DecisionCommitted
+    - RewardComputed
+    - ConsolidationRequested
+  publishes:
+    - MemoryTraceStored
+    - RecallResultReady
+    - ConsolidationBatchReady
+
+reward_engine:
+  responsibilities:
+    - compute intrinsic and extrinsic rewards
+    - compute prediction error and credit assignment windows
+  consumes:
+    - MotorOutcomeObserved
+    - GoalProgressUpdated
+  publishes:
+    - RewardComputed
+
+emergency_engine:
+  responsibilities:
+    - detect hazards and enforce safe-stop
+    - override unsafe commands
+  consumes:
+    - HazardSignalDetected
+    - DecisionCommitted
+    - MotorCommandIssued
+  publishes:
+    - EmergencyTriggered
+    - MotorOverrideIssued
+
+emotion_engine:
+  responsibilities:
+    - maintain valence/arousal/control latent state
+    - produce affect modulation coefficients
+  consumes:
+    - RewardComputed
+    - HazardSignalDetected
+  publishes:
+    - EmotionStateUpdated
+    - EmotionModulationComputed
+
+attention_engine:
+  responsibilities:
+    - rank candidate signals by saliency and relevance
+    - maintain bounded focus window with hysteresis
+  consumes:
+    - PerceptUpdated
+    - GoalContextUpdated
+    - EmotionStateUpdated
+  publishes:
+    - FocusWindowUpdated
+
+decision_engine:
+  responsibilities:
+    - generate and score action candidates
+    - arbitrate final action with ethics and emergency constraints
+  consumes:
+    - FocusWindowUpdated
+    - PredictionReady
+    - EmotionModulationComputed
+    - EthicsCheckResult
+    - MetacognitiveAssessment
+  publishes:
+    - DecisionCommitted
+    - DecisionRejected
+
+motor_engine:
+  responsibilities:
+    - convert decisions to executable trajectories/commands
+    - monitor execution and report outcomes
+  consumes:
+    - DecisionCommitted
+    - MotorOverrideIssued
+  publishes:
+    - MotorCommandIssued
+    - MotorOutcomeObserved
+
+self_model_engine:
+  responsibilities:
+    - maintain internal health/capability estimate
+    - publish confidence in current operating envelope
+  consumes:
+    - TelemetryFrameIngested
+    - MotorOutcomeObserved
+  publishes:
+    - SelfStateUpdated
+
+world_model_engine:
+  responsibilities:
+    - maintain dynamic scene graph and uncertainty estimates
+    - annotate affordances and risk map
+  consumes:
+    - SensorFrameIngested
+  publishes:
+    - PerceptUpdated
+    - WorldStateUpdated
+
+predictive_engine:
+  responsibilities:
+    - run short-horizon simulation for candidate actions
+    - emit expected outcomes and uncertainty
+  consumes:
+    - FocusWindowUpdated
+    - NeuralActivationsComputed
+  publishes:
+    - PredictionReady
+
+metacognition_engine:
+  responsibilities:
+    - estimate confidence calibration and strategy drift
+    - trigger replanning or mode downgrade on low confidence
+  consumes:
+    - DecisionCommitted
+    - PredictionReady
+    - MotorOutcomeObserved
+  publishes:
+    - MetacognitiveAssessment
+    - StrategyAdjustmentRequested
+
+personality_engine:
+  responsibilities:
+    - provide stable trait priors for risk/exploration/social bias
+  consumes:
+    - none
+  publishes:
+    - PersonalityProfileLoaded
+
+ethics_engine:
+  responsibilities:
+    - evaluate policy constraints and forbidden actions
+    - produce hard veto or bounded constraints
+  consumes:
+    - DecisionCandidateGenerated
+    - WorldStateUpdated
+  publishes:
+    - EthicsCheckResult
+    - EthicsViolationDetected
+
+sleep_consolidation_engine:
+  responsibilities:
+    - execute replay-based consolidation and pruning windows
+    - run synaptic normalization batches in low-activity states
+  consumes:
+    - LowActivityWindowOpened
+    - ConsolidationBatchReady
+  publishes:
+    - MemoryConsolidated
+    - SynapticNormalizationApplied
